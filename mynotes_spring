@@ -1,0 +1,67 @@
+spring orm--
+
+database connection
+hibernate properties
+
+
+create a session 
+
+To create it we need to create:
+			-- database connection
+			-- hibernate properties
+
+to create database connection:
+
+		DataSource(Interface)--> DriverManagerDataSource(class(object)).
+		return object of that class thorough interface.
+		
+		definition of the method looks like this:
+		
+													@Bean
+													public DataSource dataSource() {
+														DriverManagerDataSource dataSource = new DriverManagerDataSource();
+														dataSource.setDriverClassName("org.postgresql.Driver");
+														dataSource.setUrl("jdbc:postgresql://localhost:5432/mydb");
+														dataSource.setUsername("myuser");
+														dataSource.setPassword("mypassword");
+														return dataSource;
+													}
+		
+
+
+to configure hibernate properties:
+
+							--We need to create the object for Properties and then we need to put properties in that object and return that object:
+							
+								private Properties hibernateProperties() {
+									Properties properties = new Properties();
+									properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+									properties.put("hibernate.show_sql", "true");
+									properties.put("hibernate.hbm2ddl.auto", "update");
+									return properties;
+								}
+
+			
+after these we need to create a session:
+							-- To create session we need to use LocalSessionFactoryBean:
+
+								@Bean
+								public LocalSessionFactoryBean sessionFactory() {
+									LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
+									sessionFactory.setDataSource(dataSource());
+									sessionFactory.setPackagesToScan("com.example.model");
+									sessionFactory.setHibernateProperties(hibernateProperties());
+									return sessionFactory;
+								}
+
+Now create a HibernateTransactionManager and set the above created SessionFactory into it.
+
+				--To create use the below code Snippet:
+													@Bean
+													public HibernateTransactionManager transactionManager(SessionFactory sessionFactory) {
+														HibernateTransactionManager transactionManager = new HibernateTransactionManager();
+														transactionManager.setSessionFactory(sessionFactory);
+														return transactionManager;
+													}
+
+													
